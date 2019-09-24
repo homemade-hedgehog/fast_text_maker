@@ -41,7 +41,22 @@ def make_fast_text(tokens_list: list, num_dimension: int, save_folder="", min_co
     :param tokens_list: list of list of str, tokenのリストのリスト
     :param num_dimension: int, word embedding space dimension
     :param save_folder: str, path to save folder
-    :param min_count: int, fasttextがモデルに反映する最小の単語出現頻度, １なら全文書中に1度だけ出現
+    :param min_count: int, fasttextがモデルに反映する最小の単語出現頻度, １なら全文書中に1度だけ出現, 3以上が相場
     :return: bool
     """
     # arrange save folder
+    save_folder = make_save_folder(save_folder, True if save_folder == "" else False)
+
+    # 入力はスペース区切りしたテキストファイル
+    file_name_input_text = f"{save_folder}delete_me_wakati.txt"
+    wakati = "\n".join([" ".join(tokens) for tokens in tqdm(tokens_list, desc="分かち書き @ fast text")])
+    with codecs.open(file_name_input_text, "w", "utf-8") as f:
+        f.write(wakati)
+
+    # model 生成
+    model_fast_text = fasttext.train_unsupervised(file_name_input_text, model="skipgram", dim=num_dimension,
+                                                  minCount=min_count)
+    # save
+    model_fast_text.save_model(f"{save_folder}model_fast_text.bin")
+
+    return True
