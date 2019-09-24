@@ -2,6 +2,27 @@ from tqdm import tqdm
 import fasttext
 import codecs
 import os
+import hashlib
+import time
+
+
+def make_save_folder(prefix="", add_suffix=True) -> str:
+    """
+    1. 現在時刻のハッシュをsuffixにした文字列の生成
+    2. 生成した文字列のフォルダが無かったら作る
+    :param prefix:save folderの系統ラベル
+    :param add_suffix: suffixを付与するかを選ぶフラグ, True: 付与, False: 付与しない
+    :return: str, モデルのセーブ先フォルダ名
+    """
+    if prefix == "":
+        prefix = "./fast_text"
+    if add_suffix:
+        prefix = f"{prefix}_{hashlib.sha1(time.ctime().encode()).hexdigest()}"
+    if not prefix.endswith("/"):
+        prefix += "/"
+    if not os.path.exists(prefix):
+        os.mkdir(prefix)
+    return prefix
 
 
 def make_fast_text(tokens_list: list, num_dimension: int, save_folder="", min_count=1) -> bool:
